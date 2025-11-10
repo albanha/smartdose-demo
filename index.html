@@ -42,6 +42,15 @@
       font-size: 15px;
       margin: 4px 0;
     }
+    .pill-label {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .pill-name {
+      font-weight: 600;
+      color: #1f2933;
+    }
     .main-message {
       font-size: 16px;
       font-weight: 600;
@@ -62,12 +71,18 @@
 </head>
 <body>
   <div class="notification">
-    <!-- Change logo.png if your logo has another name -->
-    <img src="https://raw.githubusercontent.com/albanha/smartdose-demo/main/logo.png"
-         class="logo"
-         alt="SmartDose Logo"
-         onerror="this.style.display='none'">
+    <!-- Your logo file in the repo -->
+    <img
+      src="https://raw.githubusercontent.com/albanha/smartdose-demo/main/logo.png"
+      class="logo"
+      alt="SmartDose Logo"
+      onerror="this.style.display='none'"
+    />
     <h1>SmartDose</h1>
+    <p class="pill-label">
+      Bottle:
+      <span class="pill-name" id="pill-name">Your medication</span>
+    </p>
     <p id="label-line">Checking today’s dose status…</p>
     <p id="main-message" class="main-message"></p>
     <p id="extra-line"></p>
@@ -75,7 +90,21 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "smartdose_last_dose_date";
+    // Read ?pill= from URL, fallback if missing
+    const params = new URLSearchParams(window.location.search);
+    const pillParam = params.get("pill") || "Your medication";
+
+    const pillNameEl = document.getElementById("pill-name");
+    pillNameEl.textContent = pillParam;
+
+    // Make a safe ID for localStorage key based on pill name
+    const safeId = pillParam
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "") || "default";
+
+    // Each pill has its own key: smartdose_last_date_<pill>
+    const STORAGE_KEY = "smartdose_last_date_" + safeId;
 
     function getTodayKey() {
       const now = new Date();
@@ -95,18 +124,20 @@
     const lastDoseDate = localStorage.getItem(STORAGE_KEY);
 
     if (lastDoseDate === todayKey) {
-      // Dose already taken today
+      // This pill already taken today
       labelLine.textContent = "Today’s dose status:";
-      mainMsgEl.textContent = "✅ You’ve already taken your dose today.";
+      mainMsgEl.textContent = `✅ You’ve already taken your ${pillParam} dose today.`;
       mainMsgEl.classList.add("warning");
-      extraLineEl.textContent = "Please do NOT take another dose. Come back and scan again tomorrow.";
+      extraLineEl.textContent =
+        "Please do NOT take another dose today. Come back and scan again tomorrow.";
     } else {
-      // First scan today: mark dose as taken now
+      // First scan today for this pill: mark as taken now
       localStorage.setItem(STORAGE_KEY, todayKey);
       labelLine.textContent = "Time to take your medication:";
-      mainMsgEl.textContent = "💊 Please take your dose now.";
+      mainMsgEl.textContent = `💊 Please take your ${pillParam} dose now.`;
       mainMsgEl.classList.add("ok");
-      extraLineEl.textContent = "Your dose for today is now registered. Good job staying on track.";
+      extraLineEl.textContent =
+        "Your dose for today is now registered. Good job staying on track.";
     }
 
     tsEl.textContent = "Checked on " + now.toLocaleString();
