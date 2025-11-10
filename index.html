@@ -16,7 +16,7 @@
       justify-content: center;
     }
     .card {
-      background: #fff;
+      background: #ffffff;
       border-radius: 20px;
       box-shadow: 0 10px 35px rgba(0,0,0,0.08);
       text-align: center;
@@ -39,10 +39,8 @@
       color: #555;
       margin: 6px 0;
     }
-    .countdown {
-      font-size: 18px;
+    .highlight {
       font-weight: 600;
-      margin-top: 10px;
       color: #0074D9;
     }
   </style>
@@ -51,33 +49,9 @@
   <div class="card">
     <div class="pill-icon"></div>
     <h1>SmartDose</h1>
-    <p>⏱ You need to take your dose in approximately:</p>
-    <div class="countdown" id="countdown">45:00</div>
-    <p>Keep this bottle ready. When the timer reaches 00:00, it’s time to take your dose.</p>
+    <p class="highlight">✅ Your dose has been taken.</p>
+    <p>Please do not take another dose today.</p>
+    <p>Come back tomorrow and scan again before taking your pill.</p>
   </div>
-
-  <script>
-    // 45 minutes from page open
-    const totalSeconds = 45 * 60;
-    let remaining = totalSeconds;
-
-    const el = document.getElementById("countdown");
-
-    function updateCountdown() {
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      el.textContent =
-        String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
-
-      if (remaining > 0) {
-        remaining -= 1;
-      } else {
-        el.textContent = "00:00";
-      }
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  </script>
 </body>
 </html>
