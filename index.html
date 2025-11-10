@@ -7,51 +7,109 @@
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f7f9fc;
-      color: #1a2540;
+      background: linear-gradient(135deg, #e8f1ff 0%, #ffffff 100%);
       margin: 0;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .card {
-      background: #ffffff;
+    .notification {
+      background: #fff;
       border-radius: 20px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      padding: 30px 25px;
+      max-width: 360px;
       text-align: center;
-      padding: 40px 30px;
-      max-width: 380px;
+      animation: pop 0.3s ease-out;
     }
-    .pill-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 20px;
-      margin: 0 auto 20px;
-      background: linear-gradient(135deg, #0074D9 50%, #FFCC00 50%);
+    @keyframes pop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .logo {
+      width: 90px;
+      height: auto;
+      margin-bottom: 12px;
     }
     h1 {
-      margin: 0 0 10px;
-      font-size: 24px;
+      font-size: 22px;
+      color: #1a2540;
+      margin: 8px 0 6px;
     }
     p {
-      font-size: 16px;
       color: #555;
-      margin: 6px 0;
+      font-size: 15px;
+      margin: 4px 0;
     }
-    .highlight {
+    .main-message {
+      font-size: 16px;
       font-weight: 600;
+      margin-top: 6px;
+    }
+    .main-message.ok {
       color: #0074D9;
+    }
+    .main-message.warning {
+      color: #d97706;
+    }
+    .time {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #9ca3af;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="pill-icon"></div>
+  <div class="notification">
+    <!-- Change logo.png if your logo has another name -->
+    <img src="https://raw.githubusercontent.com/albanha/smartdose-demo/main/logo.png"
+         class="logo"
+         alt="SmartDose Logo"
+         onerror="this.style.display='none'">
     <h1>SmartDose</h1>
-    <p class="highlight">✅ Your dose has been taken.</p>
-    <p>Please do not take another dose today.</p>
-    <p>Come back tomorrow and scan again before taking your pill.</p>
+    <p id="label-line">Checking today’s dose status…</p>
+    <p id="main-message" class="main-message"></p>
+    <p id="extra-line"></p>
+    <p class="time" id="timestamp"></p>
   </div>
+
+  <script>
+    const STORAGE_KEY = "smartdose_last_dose_date";
+
+    function getTodayKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    const labelLine = document.getElementById("label-line");
+    const mainMsgEl = document.getElementById("main-message");
+    const extraLineEl = document.getElementById("extra-line");
+    const tsEl = document.getElementById("timestamp");
+
+    const now = new Date();
+    const todayKey = getTodayKey();
+    const lastDoseDate = localStorage.getItem(STORAGE_KEY);
+
+    if (lastDoseDate === todayKey) {
+      // Dose already taken today
+      labelLine.textContent = "Today’s dose status:";
+      mainMsgEl.textContent = "✅ You’ve already taken your dose today.";
+      mainMsgEl.classList.add("warning");
+      extraLineEl.textContent = "Please do NOT take another dose. Come back and scan again tomorrow.";
+    } else {
+      // First scan today: mark dose as taken now
+      localStorage.setItem(STORAGE_KEY, todayKey);
+      labelLine.textContent = "Time to take your medication:";
+      mainMsgEl.textContent = "💊 Please take your dose now.";
+      mainMsgEl.classList.add("ok");
+      extraLineEl.textContent = "Your dose for today is now registered. Good job staying on track.";
+    }
+
+    tsEl.textContent = "Checked on " + now.toLocaleString();
+  </script>
 </body>
 </html>
